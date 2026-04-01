@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>渠道拓展看板</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://accounts.google.com/gsi/client" async defer><\/script>
+<style>
+:root{--bg:#0d0f12;--bg2:#13161b;--bg3:#1a1e25;--bg4:#21262f;--line:rgba(255,255,255,0.06);--line2:rgba(255,255,255,0.1);--txt:#e8eaf0;--txt2:#8b909e;--txt3:#555b68;--accent:#4f8ef7;--accent-bg:rgba(79,142,247,0.1);--green:#3ecf7a;--green-bg:rgba(62,207,122,0.1);--amber:#f5a623;--amber-bg:rgba(245,166,35,0.1);--red:#f26b6b;--red-bg:rgba(242,107,107,0.1);--teal:#38c4c4;--teal-bg:rgba(56,196,196,0.1);--r:8px;--rl:12px;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--txt);font-size:13px;line-height:1.5;min-height:100vh;}
+.login-screen{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:200;}
+.login-box{background:var(--bg2);border:1px solid var(--line2);border-radius:18px;padding:2.5rem 2rem;width:380px;max-width:92vw;text-align:center;}
+.login-logo{font-family:'DM Mono',monospace;font-size:11px;font-weight:500;letter-spacing:.12em;color:var(--txt3);margin-bottom:1.5rem;text-transform:uppercase;}
+.login-icon{font-size:36px;margin-bottom:1rem;}
+.login-title{font-size:20px;font-weight:600;margin-bottom:6px;}
+.login-sub{font-size:12px;color:var(--txt3);margin-bottom:1.75rem;line-height:1.6;}
+.login-sub span{color:var(--txt2);}
+#g_id_signin_btn{display:flex;justify-content:center;margin-bottom:12px;}
+.login-err{font-size:11px;color:var(--red);min-height:18px;font-family:'DM Mono',monospace;margin-top:8px;}
+.login-note{font-size:11px;color:var(--txt3);margin-top:16px;padding-top:16px;border-top:1px solid var(--line);}
+.nav{background:var(--bg2);border-bottom:1px solid var(--line);height:52px;display:flex;align-items:center;justify-content:space-between;padding:0 1.5rem;position:sticky;top:0;z-index:50;}
+.nav-left{display:flex;align-items:center;gap:10px;}
+.nav-dot{width:8px;height:8px;border-radius:50%;background:var(--accent);box-shadow:0 0 8px var(--accent);animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{box-shadow:0 0 8px var(--accent);}50%{box-shadow:0 0 16px var(--accent);}}
+.nav-logo{font-family:'DM Mono',monospace;font-size:13px;font-weight:500;letter-spacing:.04em;}
+.nav-badge{font-size:10px;padding:2px 7px;border-radius:20px;background:var(--accent-bg);color:var(--accent);border:1px solid rgba(79,142,247,.25);font-family:'DM Mono',monospace;}
+.nav-right{display:flex;align-items:center;gap:10px;}
+.nav-user{font-size:12px;color:var(--txt2);}
+.avatar{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,#4f8ef7,#a78bfa);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;color:#fff;font-family:'DM Mono',monospace;overflow:hidden;}
+.avatar img{width:100%;height:100%;border-radius:50%;object-fit:cover;}
+.logout-btn{font-size:11px;padding:3px 8px;border-radius:5px;border:1px solid var(--line);background:transparent;color:var(--txt3);cursor:pointer;}
+.logout-btn:hover{color:var(--txt2);border-color:var(--line2);}
+.main{padding:1.25rem 1.5rem;max-width:1500px;margin:0 auto;}
+.stats{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;margin-bottom:1rem;}
+.stat{background:var(--bg2);border:1px solid var(--line);border-radius:var(--rl);padding:12px 16px;transition:border-color .15s;}
+.stat:hover{border-color:var(--line2);}
+.stat-val{font-family:'DM Mono',monospace;font-size:22px;font-weight:500;line-height:1;margin-bottom:4px;}
+.stat-lbl{font-size:11px;color:var(--txt3);}
+.ca{color:var(--accent);}.cg{color:var(--green);}.cam{color:var(--amber);}.ct{color:var(--teal);}.cr{color:var(--red);}
+.filter-panel{background:var(--bg2);border:1px solid var(--line);border-radius:var(--rl);padding:14px 16px;margin-bottom:10px;display:flex;flex-direction:column;gap:10px;}
+.frow{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.flbl{font-size:10px;font-family:'DM Mono',monospace;color:var(--txt3);min-width:60px;letter-spacing:.05em;text-transform:uppercase;}
+.pill{font-size:11px;padding:4px 11px;border-radius:20px;border:1px solid var(--line);background:transparent;color:var(--txt2);cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .12s;}
+.pill:hover{border-color:var(--line2);color:var(--txt);}
+.pill.on{background:var(--accent-bg);border-color:rgba(79,142,247,.35);color:var(--accent);font-weight:500;}
+.search-w{flex:1;position:relative;min-width:200px;}
+.search-w svg{position:absolute;left:10px;top:50%;transform:translateY(-50%);width:13px;height:13px;color:var(--txt3);pointer-events:none;}
+.search-w input{width:100%;font-size:12px;padding:6px 10px 6px 30px;border-radius:var(--r);border:1px solid var(--line);background:var(--bg3);color:var(--txt);font-family:'DM Sans',sans-serif;}
+.search-w input::placeholder{color:var(--txt3);}
+.search-w input:focus{outline:none;border-color:rgba(79,142,247,.4);}
+.toolbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px;}
+.count-txt{font-size:11px;color:var(--txt3);font-family:'DM Mono',monospace;}
+.count-txt b{color:var(--txt2);}
+.tbr{display:flex;align-items:center;gap:8px;}
+.sel{font-size:11px;padding:4px 8px;border-radius:var(--r);border:1px solid var(--line);background:var(--bg3);color:var(--txt2);cursor:pointer;font-family:'DM Mono',monospace;}
+.icon-btn{width:30px;height:30px;border-radius:var(--r);border:1px solid var(--line);background:var(--bg3);color:var(--txt2);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;transition:all .12s;}
+.icon-btn:hover{border-color:var(--line2);color:var(--txt);}
+@keyframes spin{to{transform:rotate(360deg);}}
+.spin{animation:spin .6s linear infinite;display:inline-block;}
+.table-wrap{background:var(--bg2);border:1px solid var(--line);border-radius:var(--rl);overflow:hidden;}
+.tbl-scroll{overflow-x:auto;}
+table{width:100%;border-collapse:collapse;min-width:960px;}
+thead th{font-size:10px;font-family:'DM Mono',monospace;font-weight:500;letter-spacing:.06em;text-transform:uppercase;color:var(--txt3);text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);background:var(--bg3);cursor:pointer;user-select:none;white-space:nowrap;}
+thead th:hover{color:var(--txt2);}
+tbody td{padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top;}
+tbody tr:last-child td{border-bottom:none;}
+tbody tr:hover td{background:rgba(255,255,255,.02);}
+.col-num{font-family:'DM Mono',monospace;font-size:11px;color:var(--txt3);}
+.col-name{font-size:12px;max-width:150px;}
+.col-name small{display:block;font-size:10px;color:var(--txt3);font-family:'DM Mono',monospace;margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.col-domain a{font-family:'DM Mono',monospace;font-size:11px;color:var(--accent);text-decoration:none;}
+.col-domain a:hover{text-decoration:underline;}
+.badge{display:inline-block;font-size:10px;padding:2px 7px;border-radius:5px;font-weight:500;white-space:nowrap;font-family:'DM Mono',monospace;border:1px solid transparent;}
+.b-adult{background:var(--amber-bg);color:var(--amber);border-color:rgba(245,166,35,.2);}
+.b-tgdir{background:var(--teal-bg);color:var(--teal);border-color:rgba(56,196,196,.2);}
+.b-adplat{background:var(--green-bg);color:var(--green);border-color:rgba(62,207,122,.2);}
+.b-site{background:var(--bg4);color:var(--txt3);border-color:var(--line);}
+.prog{display:inline-block;font-size:10px;padding:3px 8px;border-radius:5px;font-weight:500;border:1px solid transparent;font-family:'DM Mono',monospace;}
+.prog-y{background:var(--red-bg);color:var(--red);border-color:rgba(242,107,107,.2);}
+.prog-p{background:var(--amber-bg);color:var(--amber);border-color:rgba(245,166,35,.2);}
+.prog-e{background:var(--accent-bg);color:var(--accent);border-color:rgba(79,142,247,.2);}
+.prog-n{background:var(--bg4);color:var(--txt3);border-color:var(--line);}
+.c-tg{font-family:'DM Mono',monospace;font-size:11px;color:var(--teal);}
+.c-email{font-family:'DM Mono',monospace;font-size:11px;color:var(--green);}
+.c-none{font-size:11px;color:var(--txt3);}
+.conf-hi{color:var(--red);font-family:'DM Mono',monospace;font-size:11px;}
+.conf-md{color:var(--amber);font-family:'DM Mono',monospace;font-size:11px;}
+.conf-lo{color:var(--txt3);font-family:'DM Mono',monospace;font-size:11px;}
+.note-btn{font-size:10px;padding:3px 8px;border-radius:5px;border:1px solid var(--line);background:transparent;color:var(--txt3);cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .12s;}
+.note-btn:hover{border-color:var(--line2);color:var(--txt2);background:var(--bg4);}
+.note-preview{font-size:11px;color:var(--amber);max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-bottom:3px;}
+.note-meta{font-size:10px;color:var(--txt3);font-family:'DM Mono',monospace;margin-bottom:4px;}
+.open-link{font-family:'DM Mono',monospace;font-size:10px;color:var(--txt3);text-decoration:none;padding:3px 7px;border-radius:5px;border:1px solid var(--line);transition:all .12s;}
+.open-link:hover{color:var(--accent);border-color:rgba(79,142,247,.3);background:var(--accent-bg);}
+.loading{text-align:center;padding:4rem;color:var(--txt3);}
+.spinner{width:20px;height:20px;border:2px solid var(--bg4);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;display:inline-block;margin-bottom:10px;}
+.pagination{display:flex;align-items:center;justify-content:center;gap:4px;margin-top:12px;flex-wrap:wrap;}
+.pg-btn{font-size:11px;padding:5px 11px;border-radius:var(--r);border:1px solid var(--line);background:var(--bg2);color:var(--txt2);cursor:pointer;font-family:'DM Mono',monospace;transition:all .12s;}
+.pg-btn:hover{border-color:var(--line2);color:var(--txt);}
+.pg-btn.active{background:var(--accent-bg);border-color:rgba(79,142,247,.35);color:var(--accent);font-weight:500;}
+.pg-btn:disabled{opacity:.25;cursor:default;}
+.pg-sep{font-size:11px;color:var(--txt3);padding:0 4px;font-family:'DM Mono',monospace;}
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.65);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;z-index:100;}
+.modal{background:var(--bg2);border:1px solid var(--line2);border-radius:14px;padding:1.5rem;width:400px;max-width:92vw;box-shadow:0 24px 64px rgba(0,0,0,.6);animation:modal-in .15s ease;}
+@keyframes modal-in{from{opacity:0;transform:translateY(8px) scale(.98);}to{opacity:1;transform:none;}}
+.modal-title{font-size:14px;font-weight:600;margin-bottom:3px;}
+.modal-sub{font-size:11px;color:var(--txt3);margin-bottom:12px;}
+.modal textarea{width:100%;font-size:12px;line-height:1.6;padding:10px 12px;border-radius:var(--r);border:1px solid var(--line);background:var(--bg3);color:var(--txt);resize:vertical;min-height:90px;font-family:'DM Sans',sans-serif;}
+.modal textarea::placeholder{color:var(--txt3);}
+.modal textarea:focus{outline:none;border-color:rgba(79,142,247,.4);}
+.modal-footer{display:flex;align-items:center;justify-content:space-between;margin-top:12px;}
+.save-status{font-size:11px;color:var(--green);font-family:'DM Mono',monospace;min-height:16px;}
+.modal-btns{display:flex;gap:8px;}
+.btn{font-size:12px;padding:6px 16px;border-radius:var(--r);border:1px solid var(--line);cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:500;transition:all .12s;}
+.btn-ghost{background:transparent;color:var(--txt2);}
+.btn-ghost:hover{background:var(--bg4);color:var(--txt);}
+.btn-primary{background:var(--accent);border-color:var(--accent);color:#fff;}
+.btn-primary:hover{background:#6a9ef8;}
+.btn-primary:disabled{opacity:.4;cursor:default;}
+.toast{position:fixed;bottom:1.5rem;right:1.5rem;background:var(--bg3);border:1px solid var(--line2);color:var(--green);font-size:12px;font-family:'DM Mono',monospace;padding:9px 14px;border-radius:var(--r);opacity:0;transform:translateY(6px);transition:all .2s;pointer-events:none;z-index:200;box-shadow:0 8px 24px rgba(0,0,0,.4);}
+.toast.show{opacity:1;transform:none;}
+</style>
+</head>
+<body>
+
+<script>
+const API_URL = 'https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec';
+const CLIENT_ID = '488204319808-0lchh26q3mog7i00srljdh0cos8tgk4i.apps.googleusercontent.com';
+const ALLOWED_DOMAIN = '';
+<\/script>
+
+<div class="login-screen" id="loginScreen">
+  <div class="login-box">
+    <div class="login-logo">Channel · Outreach</div>
+    <div class="login-icon">📡</div>
+    <div class="login-title">渠道拓展看板</div>
+    <div class="login-sub">使用 <span>Google 账号</span> 登录以继续<br>备注将自动记录你的姓名</div>
+    <div id="g_id_signin_btn"></div>
+    <div class="login-err" id="loginErr"></div>
+    <div class="login-note">仅限授权人员访问</div>
+  </div>
+</div>
+
+<div id="app" style="display:none">
+  <nav class="nav">
+    <div class="nav-left">
+      <div class="nav-dot"></div>
+      <span class="nav-logo">CHANNEL · OUTREACH</span>
+      <span class="nav-badge">LIVE</span>
+    </div>
+    <div class="nav-right">
+      <span class="nav-user" id="navUser"></span>
+      <div class="avatar" id="navAvatar"></div>
+      <button class="logout-btn" onclick="logout()">退出</button>
+    </div>
+  </nav>
+  <div class="main">
+    <div class="stats">
+      <div class="stat"><div class="stat-val ca" id="s-total">—</div><div class="stat-lbl">总记录</div></div>
+      <div class="stat"><div class="stat-val cr" id="s-pri">—</div><div class="stat-lbl">优先联系</div></div>
+      <div class="stat"><div class="stat-val ct" id="s-tg">—</div><div class="stat-lbl">有 Telegram</div></div>
+      <div class="stat"><div class="stat-val cg" id="s-em">—</div><div class="stat-lbl">有邮箱</div></div>
+      <div class="stat"><div class="stat-val cam" id="s-note">—</div><div class="stat-lbl">已备注</div></div>
+    </div>
+    <div class="filter-panel">
+      <div class="frow">
+        <span class="flbl">进度</span>
+        <button class="pill on" onclick="setF('prog','all',this)">全部</button>
+        <button class="pill" onclick="setF('prog','优先联系',this)">优先联系</button>
+        <button class="pill" onclick="setF('prog','邮箱优先',this)">邮箱优先</button>
+        <button class="pill" onclick="setF('prog','待筛选',this)">待筛选</button>
+        <button class="pill" onclick="setF('prog','未联系',this)">未联系</button>
+      </div>
+      <div class="frow">
+        <span class="flbl">联系方式</span>
+        <button class="pill on" onclick="setF('contact','all',this)">全部</button>
+        <button class="pill" onclick="setF('contact','tg',this)">有 TG</button>
+        <button class="pill" onclick="setF('contact','email',this)">有邮箱</button>
+        <button class="pill" onclick="setF('contact','none',this)">无联系方式</button>
+      </div>
+      <div class="frow">
+        <span class="flbl">类型</span>
+        <button class="pill on" onclick="setF('type','all',this)">全部</button>
+        <button class="pill" onclick="setF('type','站点',this)">站点</button>
+        <button class="pill" onclick="setF('type','成人站点',this)">成人站点</button>
+        <button class="pill" onclick="setF('type','TG频道目录',this)">TG 频道目录</button>
+        <button class="pill" onclick="setF('type','广告平台',this)">广告平台</button>
+      </div>
+      <div class="frow">
+        <span class="flbl">搜索</span>
+        <div class="search-w">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="6.5" cy="6.5" r="4"/><path d="M10.5 10.5l3 3"/></svg>
+          <input id="searchInput" type="text" placeholder="站点名称、域名、TG账号、邮箱…" oninput="goPage(1)">
+        </div>
+      </div>
+    </div>
+    <div class="toolbar">
+      <div class="count-txt">筛选到 <b id="shown">—</b> 条</div>
+      <div class="tbr">
+        <span class="count-txt">每页</span>
+        <select class="sel" id="pageSize" onchange="goPage(1)">
+          <option value="15">15</option>
+          <option value="25" selected>25</option>
+          <option value="50">50</option>
+          <option value="999">全部</option>
+        </select>
+        <button class="icon-btn" id="refreshBtn" onclick="loadData()" title="刷新">&#8635;</button>
+      </div>
+    </div>
+    <div class="table-wrap">
+      <div id="loadingEl" class="loading"><div class="spinner"></div><br>正在从 Google Sheet 加载数据…</div>
+      <div class="tbl-scroll" id="tableWrap" style="display:none">
+        <table>
+          <thead><tr>
+            <th onclick="sortBy('rowNum')">#</th>
+            <th onclick="sortBy('siteName')">站点名称</th>
+            <th onclick="sortBy('domain')">主域名</th>
+            <th onclick="sortBy('siteType')">类型</th>
+            <th>联系方式</th>
+            <th onclick="sortBy('progress')">进度</th>
+            <th onclick="sortBy('confidence')">置信度</th>
+            <th>备注</th>
+            <th></th>
+          </tr></thead>
+          <tbody id="tbody"></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="pagination" id="pagination"></div>
+  </div>
+</div>
+
+<div class="modal-bg" id="modalBg" style="display:none" onclick="bgClich(event)">
+  <div class="modal">
+    <div class="modal-title" id="modal-title">备注</div>
+    <div class="modal-sub">备注将记录你的姓名和时间，并实时同步到 Google Sheet</div>
+    <textarea id="modal-ta" placeholder="输入跟进进展、联系结果或其他信息…"></textarea>
+    <div class="modal-footer">
+      <div class="save-status" id="save-status"></div>
+      <div class="modal-btns">
+        <button class="btn btn-ghost" onclick="closeModal()">取消</button>
+        <button class="btn btn-primary" id="btn-save" onclick="saveNote()">保存备注</button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+let allData=[],curUser={name:'',email:'',picture:''};
+let progF='all',contactF='all',typeF='all';
+let sortCol='rowNum',sortDir=1,curPage=1,modalRowNum=null;
+let googleToken='';
+
+window.addEventListener('load',()=>{
+  const saved=sessionStorage.getItem('guser');
+  if(saved){try{curUser=JSON.parse(saved);showApp();loadData();return;}catch(e){sessionStorage.removeItem('guser');}}
+  const gsiScript=document.querySelector('script[src*="gsi"]');
+  if(window.google&&window.google.accounts)initGoogle();
+  else gsiScript.addEventListener('load',initGoogle);
+});
+
+function initGoogle(){
+  google.accounts.id.initialize({client_id:CLIENT_ID,callback:handleCredential,auto_select:false,cancel_on_tap_outside:false});
+  google.accounts.id.renderButton(document.getElementById('g_id_signin_btn'),{theme:'filled_black',size:'large',width:300,text:'signin_with',shape:'rectangular',logo_alignment:'left'});
+  google.accounts.id.prompt();
+}
+
+function handleCredential(response){
+  try{
+    const payload=JSON.parse(atob(response.credential.split('.')[1]));
+    const email=payload.email||'';
+    const name=payload.name||email.split('@')[0];
+    const picture=payload.picture||'';
+    if(ALLOWED_DOMAIN&&!email.endsWith('@'+ALLOWED_DOMAIN)){
+      document.getElementById('loginErr').textContent='仅限 @'+ALLOWED_DOMAIN+' 邮箱登录';return;
+    }
+    curUser={name,email,picture};
+    sessionStorage.setItem('guser',JSON.stringify(curUser));
+    googleToken=response.credential;
+    showApp();loadData();
+  }catch(e){document.getElementById('loginErr').textContent='登录失败，请重试';}
+}
+
+function showApp(){
+  document.getElementById('loginScreen').style.display='none';
+  document.getElementById('app').style.display='block';
+  document.getElementById('navUser').textContent=curUser.email;
+  const av=document.getElementById('navAvatar');
+  if(curUser.picture)av.innerHTML='<img src="'+curUser.picture+'" alt="'+curUser.name+'">';
+  else av.textContent=curUser.name.substring(0,2).toUpperCase();
+}
+
+function logout(){sessionStorage.removeItem('guser');if(window.google)google.accounts.id.disableAutoSelect();location.reload();}
+
+function loadData(){
+  const btn=document.getElementById('refreshBtn');
+  btn.innerHTML='<span class="spin">&#8635;</span>';
+  document.getElementById('loadingEl').style.display='block';
+  document.getElementById('tableWrap').style.display='none';
+  fetch(API_URL+'?pwd=GOOGLE_AUTH')
+    .then(r=>r.json())
+    .then(res=>{
+      if(res.error){showToast('加载失败：'+res.error);btn.innerHTML='&#8635;';return;}
+      allData=res.data||[];
+      document.getElementById('loadingEl').style.display='none';
+      document.getElementById('tableWrap').style.display='block';
+      btn.innerHTML='&#8635;';
+      updateStats();goPage(1);
+    })
+    .catch(()=>{btn.innerHTML='&#8635;';showToast('网络错误，请检查 API_URL');});
+}
+
+function updateStats(){
+  document.getElementById('s-total').textContent=allData.length;
+  document.getElementById('s-pri').textContent=allData.filter(r=>r.progress==='优先联系').length;
+  document.getElementById('s-tg').textContent=allData.filter(r=>r.tgMain).length;
+  document.getElementById('s-em').textContent=allData.filter(r=>r.email).length;
+  document.getElementById('s-note').textContent=allData.filter(r=>r.note).length;
+}
+
+function setF(k,v,btn){
+  if(k==='prog')progF=v;else if(k==='contact')contactF=v;else typeF=v;
+  const i={prog:1,contact:2,type:3}[k];
+  document.querySelectorAll('.filter-panel .frow:nth-child('+i+') .pill').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');goPage(1);
+}
+
+function getFiltered(){
+  const q=(document.getElementById('searchInput').value||'').toLowerCase();
+  return allData.filter(r=>{
+    if(progF!=='all'&&r.progress!==progF)return false;
+    if(contactF==='tg'&&!r.tgMain)return false;
+    if(contactF==='email'&&!r.email)return false;
+    if(contactF==='none'&&(r.tgMain||r.email))return false;
+    if(typeF!=='all'&&r.siteType!==typeF)return false;
+    if(q&&![r.siteName,r.domain,r.tgMain,r.email].some(v=>(v||'').toLowerCase().includes(q)))return false;
+    return true;
+  });
+}
+
+function sortBy(col){if(sortCol===col)sortDir*=-1;else{sortCol=col;sortDir=1;}render();}
+function goPage(p){curPage=p;render();}
+
+function render(){
+  let data=getFiltered();
+  data.sort((a,b)=>{const av=a[sortCol]||'',bv=b[sortCol]||'';return(av>bv?1:av<bv?-1:0)*sortDir;});
+  const ps=parseInt(document.getElementById('pageSize').value)||25;
+  const total=data.length,pages=Math.max(1,Math.ceil(total/ps));
+  if(curPage>pages)curPage=pages;
+  const start=(curPage-1)*ps,end=Math.min(start+ps,total);
+  document.getElementById('shown').textContent=total;
+  const tC={'成人站点':'b-adult','TG频道目录':'b-tgdir','广告平台':'b-adplat','站点':'b-site'};
+  const pC={'优先联系':'prog-y','邮箱优先':'prog-p','待筛选':'prog-e','未联系':'prog-n'};
+  const cC=c=>c>=0.85?'conf-hi':c>=0.70?'conf-md':'conf-lo';
+  const tbody=document.getElementById('tbody');
+  const page=data.slice(start,end);
+  if(!page.length){tbody.innerHTML='<tr><td colspan="9" style="text-align:center;padding:3rem;color:var(--txt3)">无匹配结果</td></tr>';}
+  else{
+    tbody.innerHTML=page.map(r=>{
+      const noteHtml=r.note
+        ?'<div class="note-preview" title="'+r.note+'">&#9679; '+r.note+'</div><div class="note-meta">'+(r.noteWho||'')+' &middot; '+(r.noteTime||'')+'</div><button class="note-btn" onclick="openModal('+r.rowNum+',''+esc(r.siteName)+'',''+esc(r.note)+'')">编辑</button>'
+        :'<button class="note-btn" onclick="openModal('+r.rowNum+',''+esc(r.siteName)+'','')">+ 添加</button>';
+      const ct=(r.tgMain?'<div class="c-tg">'+r.tgMain+'</div>':'')+(r.email?'<div class="c-email">'+r.email+'</div>':'')+(!r.tgMain&&!r.email?'<span class="c-none">—</span>':'');
+      return'<tr><td class="col-num">'+r.rowNum+'</td><td class="col-name">'+( r.siteName||r.domain)+'<small>'+(r.keyword||'')+'</small></td><td class="col-domain"><a href="'+r.url+'" target="_blank">'+r.domain+'</a></td><td><span class="badge '+(tC[r.siteType]||'b-site')+'">'+r.siteType+'</span></td><td>'+ct+'</td><td><span class="prog '+(pC[r.progress]||'prog-n')+'">'+(r.progress||'—')+'</span></td><td><span class="'+cC(r.confidence)+'">'+r.confidence+'</span></td><td style="min-width:130px">'+noteHtml+'</td><td><a class="open-link" href="'+r.url+'" target="_blank">打开 &#8599;</a></td></tr>';
+    }).join('');
+  }
+  renderPager(total,pages,curPage,start,end);
+}
+
+function esc(s){return(s||'').replace(/'/g,"\'").replace(/"/g,'&quot;');}
+
+function renderPager(total,pages,cur,start,end){
+  const el=document.getElementById('pagination');
+  if(pages<=1){el.innerHTML='';return;}
+  let h='<button class="pg-btn" onclick="goPage('+(cur-1)+')" '+(cur<=1?'disabled':'')+'>&#8592; 上一页</button>';
+  const range=[];
+  for(let i=1;i<=pages;i++){if(i===1||i===pages||Math.abs(i-cur)<=2)range.push(i);else if(range[range.length-1]!=='…')range.push('…');}
+  range.forEach(p=>{if(p==='…')h+='<span class="pg-sep">…</span>';else h+='<button class="pg-btn'+(p===cur?' active':'')+'" onclick="goPage('+p+')">'+p+'</button>';});
+  h+='<button class="pg-btn" onclick="goPage('+(cur+1)+')" '+(cur>=pages?'disabled':'')+'>下一页 &#8594;</button>';
+  h+='<span class="pg-sep">第 '+(start+1)+'–'+end+' / 共 '+total+'</span>';
+  el.innerHTML=h;
+}
+
+function openModal(rowNum,name,existingNote){
+  modalRowNum=rowNum;
+  document.getElementById('modal-title').textContent=name||('行 #'+rowNum);
+  document.getElementById('modal-ta').value=existingNote||'';
+  document.getElementById('save-status').textContent='';
+  document.getElementById('btn-save').disabled=false;
+  document.getElementById('modalBg').style.display='flex';
+  setTimeout(()=>document.getElementById('modal-ta').focus(),60);
+}
+function bgClick(e){if(e.target===document.getElementById('modalBg'))closeModal();}
+function closeModal(){document.getElementById('modalBg').style.display='none';modalRowNum=null;}
+
+function saveNote(){
+  const text=document.getElementById('modal-ta').value.trim();
+  const btn=document.getElementById('btn-save');
+  btn.disabled=true;
+  document.getElementById('save-status').textContent='保存中…';
+  fetch(API_URL,{method:'POST',body:JSON.stringify({pwd:'GOOGLE_AUTH',rowNum:modalRowNum,note:text,who:curUser.name,email:curUser.email})})
+    .then(r=>r.json())
+    .then(res=>{
+      if(res.success){
+        const row=allData.find(r=>r.rowNum===modalRowNum);
+        if(row){row.note=text;row.noteWho=res.who;row.noteTime=res.time;}
+        updateStats();render();closeModal();showToast('✓ 备注已写入 Google Sheet');
+      }else{document.getElementById('save-status').textContent='失败：'+(res.error||'未知');btn.disabled=false;}
+    })
+    .catch(()=>{document.getElementById('save-status').textContent='网络错误';btn.disabled=false;});
+}
+
+function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2800);}
+<\/script>
+</body>
+</html>
